@@ -1,6 +1,5 @@
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
-
 #include "convert.h"
 #include <iostream>
 #include <string>
@@ -34,31 +33,25 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/console/parse.h>
 #endif
-
 class Visualizer
 {
 public:
+    // bool variables for display type either polygons or pointcloud
+    // default size for PCL render window
     Visualizer();
-    pcl::PointCloud<pcl::PointNormal> loadToCload(cv::Mat color, cv::Mat depth);
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;    // viewer = displayPointCloudColor || displaypolygonMesh
+    // viewer = displayPointCloudColor || displaypolygonMesh
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
     bool displayPoly;
     bool displayPoints;
-
-    //boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPointCloudColor (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
+    //Display point cloud
     boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPointCloudColor (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud,cv::Mat color);
+    //Display polygon mesh
     boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPolyMesh (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud,pcl::PolygonMesh triangles, cv::Mat color);
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPointCloudColorNormal (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::ConstPtr normals1, pcl::PointCloud<pcl::Normal>::ConstPtr normals2);
-    void setRenderWindowWidth(cv::Mat image);
-    void setRenderWindowHeight(cv::Mat image);
-    int getRenderWindowWidth();
-    int getRenderWindowHeight();
     cv::FileStorage fs;
     std::string cameraCal;
     cv::Mat Q;
 private:
     int renderFrameWidth;
     int renderFrameHeight;
-
 };
-
 #endif // VISUALIZER_H

@@ -1,11 +1,12 @@
 #include "histogram.h"
 using namespace cv;
 using namespace std;
+
 histogram::histogram(int n, int m)
 {
     rows = n;
     columns = m;
-    dataVector.resize(n*m,0); //núllstilla
+    dataVector.resize(n*m,0); //initialize as zero
     numberOfEls = 0;
 }
 

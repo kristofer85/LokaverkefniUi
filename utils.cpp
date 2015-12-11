@@ -414,27 +414,6 @@ shiftInfo gradiantShiftAndDistortion(matPair undistorted_images)
              }
          }
 
-         //double new_distortion = goldenSectionSearch(-0.3,0.3,0.001, undistorted_images, distortionMatch,dx,dy,top0,top1,
-         //                             right0,right1,bottom0,bottom1,left0,left1);
-         //qDebug()<<"------------------------------------------------------------------------"
-         //           <<"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-         //           <<"Distortion is"<<new_distortion
-         //           <<"\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
-         //           <<"------------------------------------------------------------------------";
-         //if(abs(new_distortion - distortion)<0.00001)
-         //{
-//
-         //        distortion = new_distortion;
-         //        break;
-         //}
-         //else
-         //{
-//
-         //        elliptic_transformation(undistorted_images[0],grayImages[0],new_distortion/grayImages[0].cols,grayImages[0].cols-1,grayImages[0].rows/2);
-         //        elliptic_transformation(undistorted_images[1],grayImages[1],new_distortion/grayImages[1].cols,0,grayImages[1].rows/2);
-         //        distortion = new_distortion;
-         //}
-     //}
      shiftInfo returnInfo;
      returnInfo.dx = dx;
      returnInfo.dy = dy;
@@ -618,7 +597,7 @@ void tangent_distortion_correction(Mat src_mat, Mat * dst_mat, float left, float
         remap( src_mat, *dst_mat, map_x, map_y, CV_INTER_LINEAR, BORDER_CONSTANT, Scalar(0,0, 0) );
 
 }
-
+/*
 void shift_image(Mat src_mat, Mat * dst_mat, float up, float left)
 {
         Mat map_x, map_y;
@@ -635,7 +614,7 @@ void shift_image(Mat src_mat, Mat * dst_mat, float up, float left)
         remap( src_mat, *dst_mat, map_x, map_y, CV_INTER_LINEAR, BORDER_CONSTANT, Scalar(0,0, 0) );
 
 }
-
+*/
 
 
 int findSideBox(const Mat &image, double maxStdev,int numberOfLines, float maxSizeRatio, int maxColorDiff, double grayScaleSize, char
@@ -962,135 +941,6 @@ float getZoomValue(string imagePath)
 */
         image.release();
         return zoom;
-}
-
-
-void keystone(Mat src, Mat dst)
-{
-    cv::Point2f srcQuad[] =
-    {
-        cv::Point2f(0, 0), // src Top left
-        cv::Point2f(src.cols-1, 0), // src Top right
-        cv::Point2f(src.cols-1, src.rows-1), // src Bottom right
-        cv::Point2f(0, src.rows-1) // src Bottom left
-    };
-
-    cv::Point2f dstQuad[] =
-    {
-        cv::Point2f(0, 0), // src Top left
-        cv::Point2f(src.cols-1, 0), // src Top right
-        cv::Point2f(src.cols-1, src.rows-1), // src Bottom right
-        cv::Point2f(0, src.rows-1) // src Bottom left
-    };
-
-    Mat warp_mat = getPerspectiveTransform(srcQuad, dstQuad);
-
-    warpPerspective(src, dst, warp_mat, src.size(), INTER_LINEAR,BORDER_CONSTANT, cv::Scalar());
-
-    imwrite("key.jpg", dst);
-}
-
-Ptr<StereoMatcher> createRightMatcher2(Ptr<StereoMatcher> matcher_left)
-{
-    int min_disp = matcher_left->getMinDisparity();
-    int num_disp = matcher_left->getNumDisparities();
-    int wsize    = matcher_left->getBlockSize();
-
-    if(Ptr<StereoSGBM> sgbm = matcher_left.dynamicCast<StereoSGBM>())
-    {
-        Ptr<StereoSGBM> right_sgbm = StereoSGBM::create(sgbm->getMinDisparity()+1,num_disp,wsize);
-        qDebug()<<"min dif = "<< right_sgbm->getMinDisparity();
-        right_sgbm->setUniquenessRatio(sgbm->getUniquenessRatio());
-        right_sgbm->setP1(sgbm->getP1());
-        right_sgbm->setP2(sgbm->getP2());
-        right_sgbm->setMode(sgbm->getMode());
-        right_sgbm->setPreFilterCap(sgbm->getPreFilterCap());
-        right_sgbm->setDisp12MaxDiff(sgbm->getDisp12MaxDiff());
-        right_sgbm->setSpeckleWindowSize(sgbm->getSpeckleWindowSize());
-        right_sgbm->setSpeckleRange(sgbm->getSpeckleRange());
-        return right_sgbm;
-    }
-    else
-    {
-        CV_Error(Error::StsBadArg, "createRightMatcher supports only StereoSGBM");
-        return Ptr<StereoMatcher>();
-    }
-}
-
-void proccess(std::string imagepath)
-{
-    Mat fullImg;
-}
-
-
-Mat limit_precision_mat(Mat M, int precision)
-{
-
-    if(M.rows == 1)
-    {
-        for(int x = 0 ; x< M.rows; x++)
-        {
-
-            M.at<double>(x) = limit_precision(M.at<double>(x),precision);
-        }
-    }
-    else
-    {
-        for(int i = 0 ; i < M.rows; i++)
-        {
-            for(int x = 0 ; x< M.cols; x++)
-            {
-                double test = M.at<double>(i,x) ;
-                int pre = precision;
-
-                M.at<double>(i,x) = limit_precision(test,pre);
-            }
-        }
-    }
-    return M;
-}
-
-Mat limit_precision_matF(Mat M, int precision)
-{
-
-    if(M.rows == 1)
-    {
-        for(int x = 0 ; x< M.rows; x++)
-        {
-
-            M.at<float>(x) = limit_precision2(M.at<float>(x),precision);
-        }
-    }
-    else
-    {
-        for(int i = 0 ; i < M.rows; i++)
-        {
-            for(int x = 0 ; x< M.cols; x++)
-            {
-                float test = M.at<float>(i,x) ;
-                int pre = precision;
-
-                test = (float)limit_precision2(test,pre);
-                cout << "test = " << test << endl;
-                M.at<float>(i,x) = test;
-            }
-        }
-    }
-    return M;
-}
-
-double limit_precision(double val, int precision)
-{
-    double temp = (double) floor(((double)val * pow(10, precision) + 0.5)) / pow(10, precision);
-    cout << val << " floored = "<< temp << endl;
-    return temp;
-}
-
-float limit_precision2(float val, int precision)
-{
-    float temp = floor((val * pow(10, precision) + 0.5)) / pow(10, precision);
-    cout << val << " floored = "<< temp << endl;
-    return temp;
 }
 
 matPair undestort(matPair pair)

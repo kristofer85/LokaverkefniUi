@@ -1,10 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-//#include "windows.h"
-//#include "psapi.h"
-#include "PCL/io/ply_io.h"
-//#include <boost/signals2.hpp>
-//#include <boost/type_traits.hpp>
 using namespace cv;
 using namespace std;
 
@@ -20,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dispSet.speckleRange = 2;
     dispSet.speckleSize = 200;
     dispSet.unique = 0;
-    string cameraCal = "../lokaverkefni2/Q.xml";
+    string cameraCal = "../lokaverkefniUi/Q.xml";
     FileStorage fs = FileStorage(cameraCal, FileStorage::READ);  
     fs["Q"] >> Q;
     fs.release();
@@ -112,7 +107,7 @@ void MainWindow::on_btnProcess_clicked()
 
 void MainWindow::on_pushButton_clicked()
 {
-    stereoCalibrate.findAndDrawChessBoardCorners("../lokaverkefni2/Y.xml");
+    stereoCalibrate.findAndDrawChessBoardCorners("../lokaverkefniUi/Y.xml");
     stereoCalibrate.CalibrateStereoCamera();
     stereoCalibrate.rectifyCamera();
     stereoCalibrate.clean();
@@ -237,6 +232,7 @@ void MainWindow::on_btnPCL_clicked()
         //   Loop untils pcl viewer is turned off *
         //----------------------------------------
         viewer = true;
+
         while ( !visualizer.viewer->wasStopped())
         {
           visualizer.viewer->spinOnce(100);
@@ -249,19 +245,6 @@ void MainWindow::on_btnPCL_clicked()
     {
         ui->output->setText("the image and the depthmap are not the same size");
     }
-    //cv::resize(disparity,disparity,Size(),0.50,0.50);
-    //cv::resize(color,color,Size(),0.50,0.50);
-    //cv::resize(color,color,Size(),0.50,0.50);
-
-    //mainCloud.reset();
-    //pcl::PCLPointCloud2 cloud_blob;
-    //pcl::io::loadPCDFile ("SmoothNormals.pcd", cloud_blob);
-    //fromPCLPointCloud2 (cloud_blob, *mainCloud);
-    //triangles = utilities.triangulate(mainCloud);
-    //normal = utilities.curveNormals(mainCloud);
-
-
-
 
 }
 

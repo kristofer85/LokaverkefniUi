@@ -42,24 +42,31 @@
 #include "visualizer.h"
 #endif
 #include "stereocalibrate.h"
-
 //#include <QApplication>
 #include "convert.h"
-
 class Convert
 {
-
     public:
         Convert();
         //pcl::PolygonMesh possitionMesh(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud);
+        pcl::PointCloud<pcl::PointNormal> disparityToPointCloud(cv::Mat color, cv::Mat depth);
         pcl::PointCloud<pcl::PointNormal> smoothNormals(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+
+        // converts depth map and color map for the right image to point cloud
+        // creates one point for each pixel with color info and position in 3d space
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr matToCloud(cv::Mat rgb,cv::Mat disp,cv::Mat Q,pcl::PointCloud<pcl::PointXYZRGB>::Ptr Cloud);
+
+         // filter out points that are out of certain range from other points
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr SOR_filter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+
+        // draws polygons between points in the point cloud
         pcl::PolygonMesh triangulate(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
+
+        // smooths out point clouds normal based on average depth change
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr curveNormals(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
-        pcl::PointCloud<pcl::PointXYZI>::Ptr disparityToPointCloud(std::string disparity);
-        pcl::PolygonMesh triangulate2(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 
+        cv::Mat Q;
+        cv::FileStorage fs;
+        std::string cameraCal;
 };
-
 #endif // CONVERT_H
