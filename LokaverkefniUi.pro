@@ -10,32 +10,24 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = LokaverkefniUi
 TEMPLATE = app
+#QMAKE_CXXFLAGS += -std=c++11
 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     stereocalibrate.cpp \
-    stereoscopicimage.cpp \
     convert.cpp \
-    pclfilters.cpp \
     visualizer.cpp \
-    test.cpp \
-    reprojectimageto3d.cpp \
     utils.cpp \
-    depthmap.cpp \
     Rectify.cpp \
     histogram.cpp \
     depthmap.cpp
 
 HEADERS  += mainwindow.h \
     stereocalibrate.h \
-    stereoscopicimage.h \
     defines.h \
     convert.h \
-    pclfilters.h \
     visualizer.h \
-    test.h \
-    reprojectimageto3d.h \
     utils.h \
     depthmap.h \
     Rectify.h \
@@ -44,7 +36,6 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui
 
 
-#INCLUDEPATH += C:/msys64/mingw32/include/
 INCLUDEPATH += C:/msys64/home/Notandi/opencv/build2/install/include/
 INCLUDEPATH += C:/msys64/home/Notandi/vtk/build/install/include/vtk-6.2
 INCLUDEPATH += C:/msys64/home/Notandi/cloudstuff/pl-build/install/include/pcl-1.8
@@ -54,10 +45,10 @@ INCLUDEPATH += C:/msys64/mingw32/include/json
 INCLUDEPATH += C:/msys64/mingw32/include/glib-2.0/
 INCLUDEPATH += C:/msys64/mingw32/include/
 INCLUDEPATH += C:/msys64/mingw32/lib/glib-2.0/include/
-win32: LIBS += -LC:/msys64/mingw32/i686-w64-mingw32/lib \
-                -lkernel32 \
-                -lpsapi \
-                -luser32
+#win32: LIBS += -LC:/msys64/mingw32/i686-w64-mingw32/lib \
+ #               -lkernel32 \
+  #              -lpsapi \
+   #             -luser32
 win32: LIBS += -LC:/msys64/home/Notandi/vtk/build/install/lib \
                -LC:/msys64/home/Notandi/cloudstuff/pl-build/install/lib \
                -LC:/msys64/home/Notandi/opencv/build2/install/x86/mingw/lib \
