@@ -107,20 +107,7 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
         cutSize = img1.size();
         cvtColor(img1,gray1,CV_RGB2GRAY);
         cvtColor(img2,gray2,CV_RGB2GRAY);
-/*
-        left = LEFTRIGHTSCALED;
-        left.append(l);
-        imwrite(left,img1);         // Left Color image used for coloring the polyMesh
-        right = LEFTRIGHTSCALED;
-        right.append(r);
-        imwrite(right,img2);        // Right Color not as inportant.
-        left = LEFTRIGHTSCALED;
-        left.append(l_gGray);
-        imwrite(l_gGray,gray1);            // Left B&W Image used for comarison in depth mapping
-        right = LEFTRIGHTSCALED;
-        right.append(r_gGray);
-        imwrite(r_gGray,gray2);           // Left B&W Image, the image left compares itself with.
-*/
+
         bool found1 = false;
         bool found2 = false;
 
@@ -152,29 +139,11 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
             success++;
             //find translation between corners in
             cout << " image: " << ChessboardImageList << " "<< success << endl;
-            int cornerNr = (int)corners1.size();
-            /*
-            for(int i = 0; i < cornerNr; i++)
-            {
-                Point2d left = corners1[i];
-                Point2d right = corners2[i];
-                cout << "Y left = " <<left.y << " Y right = " << right.y << " difference =" << left.y-right.y << endl;
-                cout << "X left = " <<left.x << " X right = " << right.x << " difference =" << left.x-right.x << endl;
-            }
-            */
 
             imagePoints1.push_back(corners1);
             imagePoints2.push_back(corners2);
             objectpoints.push_back(obj);
 
-            /*
-            ChessboardImageList = CHESSBOARDIMAGES;
-            ChessboardImageList.append("leftFound"+(string)*it);
-            imwrite(ChessboardImageList,gray1);
-            ChessboardImageList = CHESSBOARDIMAGES;
-            ChessboardImageList.append("rightFound"+(string)*it);
-            imwrite(ChessboardImageList+(string)*it,gray2);
-            */
 
         }
 
@@ -186,46 +155,19 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
 
 void StereoCalibrate::CalibrateStereoCamera()
 {
-
-    //CM1 = getCameraMatrix(zoom_valueC*focalResC, imSize.width, imSize.height);
-    //CM2 = getCameraMatrix(zoom_valueC*focalResC, imSize.width, imSize.height);
-
     cout << "cutSize is "<< cutSize << endl;
 
     string file_name = "../Lokaverkefni2/chessboardKulaImages/DSC_0209_sbs.jpg";
-    //string file_name = "../Lokaverkefni2/chessboardImages/calib1_fixed.jpg";
 
 
     Mat Image = imread(file_name,IMREAD_COLOR);
     Size imSize = Image.size();
     Mat img1 = Image(Range(0, imSize.height),Range(0, imSize.width/2)).clone();
     Mat img2 = Image(Range(0, imSize.height),Range(imSize.width/2, imSize.width)).clone();
-    //resize(img1,img1,Size(),0.50,0.50);
-    //resize(img2,img2,Size(),0.50,0.50);
     resize(img1,img1,Size(),0.25,0.25);
     resize(img2,img2,Size(),0.25,0.25);
     cout << "calib size" << img1.cols <<" " << img1.rows << endl;
 
-    /*
-    string imagePath = "C:/calibmyndir/DSC_0071.JPG";
-    Mat distCoeffs;
-
-    double zoom_value = getZoomValue(imagePath);
-
-    if(!getDistCoeffs(distCoeffs, zoom_value, file_name))
-    {
-            qDebug()<<"Failed to get distortion coeffs";
-    }
-    double focalRes = getFocalResolution(imagePath);
-    cout << "focal = " << focalRes << endl;
-    cout << "Zoom = " << zoom_value << endl;
-    if (focalRes*zoom_value < 1)
-    {
-            qDebug()<<"No focal resolution found";
-    }
-    */
-    //CM1 = getCameraMatrix(1, img1.cols, img1.rows);
-    //CM2 = getCameraMatrix(1, img2.cols+100, img2.rows+50);
     CM1 = initCameraMatrix2D(objectpoints,imagePoints1,cutSize,0);
     CM2 = initCameraMatrix2D(objectpoints,imagePoints2,cutSize,0);
 
@@ -253,24 +195,6 @@ void StereoCalibrate::CalibrateStereoCamera()
                                  ,
                                  cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5));
     cout << "done with RMS error=" << rms << endl;
-
-
-
-
-/*
-    CM1 = limit_precision_mat(CM1,4);
-    CM2 = limit_precision_mat(CM2,4);
-    R = limit_precision_matF(R,4);
-    T = limit_precision_mat(T,4);
-    F = limit_precision_mat(F,4);
-    E = limit_precision_mat(E,4);
-
-    cout << "distCoeff " << D1 << endl;
-    cout << "camera1 = " << CM1 << endl;
-    cout << "camera2 = " << CM2 << endl;
-    cout << "Rotation = " << R << endl;
-    cout << "Translation = " << T << endl;
-*/
 
     double err = 0;
     int npoints = 0;
@@ -364,23 +288,7 @@ Rect computeROI(Size2i src_sz, Ptr<StereoMatcher> matcher_instance)
 
 matPair StereoCalibrate::initUndistort(matPair Pair)
 {
-    /*
-    //string bleh = CALIBFOLDER;
-    string bleh = CHESSBOARDKULAIMAGESOLD;
-    //string bleh = CHESSBOARDIMAGES;
 
-    bleh.append("DSC_0209_sbs.jpg");
-    //bleh.append("calib1_fixed.jpg");
-    //bleh.append("DSC_0025.JPG");
-    Mat fullImg = imread(bleh,IMREAD_COLOR);
-
-    //pyrDown(fullImg,fullImg,Size(fullImg.cols/2,fullImg.rows/2));
-    //split sterio pic into two images
-    //Size imSize = fullImg.size();
-
-    Mat img1 = fullImg(Range(0, imSize.height),Range(0, imSize.width/2)).clone();
-    Mat img2 = fullImg(Range(0, imSize.height),Range(imSize.width/2, imSize.width)).clone();
-    */
     img1 = Pair.left;
     img2 = Pair.right;
     Mat i1;
@@ -400,58 +308,15 @@ matPair StereoCalibrate::initUndistort(matPair Pair)
     stereoCalibrationStored["P2"] >> P2;
     stereoCalibrationStored.release();
 
-    //Mat img1 = fullImg(Range(0, imSize.height),Range(0, imSize.width/2)).clone();
-    //imwrite("leftColor.png",img1);
-    //Mat img2 = fullImg(Range(0, imSize.height),Range(imSize.width/2, imSize.width)).clone();
-    //imwrite("rightColor.png",img2);
-    //Mat newImg= Mat::zeros(img1.size().height, img1.size().width, img1.type());
-    //shift_image(img1,&newImg,100,10);
-       //CM1 = getCameraMatrix(zoom_value*focalRes, img1.cols, img1.rows);
-       //CM2 = getCameraMatrix(zoom_value*focalRes, img2.cols, img2.rows);
     cout << " R matrix" << endl;
     cout << R << endl;
-    //T.at<double>(0) += 50;
-    //stereoRectify( CM1, D1, CM2, D2, img1.size(), R, T, R1, R2, P1, P2, Q ,0,0);
-    //initUndistortRectifyMap(CM1, D1, Mat(), P1, img1.size(), CV_16SC2, map1x, map1y);
+
     initUndistortRectifyMap(CM1, D1, R1, P1, img1.size(), CV_16SC2, map1x, map1y);
-    //initUndistortRectifyMap(CM2, D2, Mat(), P2, img2.size(), CV_16SC2, map2x, map2y);
     initUndistortRectifyMap(CM2, D2, R2, P2, img2.size(), CV_16SC2, map2x, map2y);
 
     remap(img1, i1, map1x, map1y, INTER_LINEAR);
     remap(img2, i2, map2x, map2y, INTER_LINEAR);
-/*
-    namedWindow("imageOrg",CV_WINDOW_KEEPRATIO);
-    namedWindow("image1",CV_WINDOW_KEEPRATIO);
-    namedWindow("imageOrg2",CV_WINDOW_KEEPRATIO);
-    namedWindow("image2",CV_WINDOW_KEEPRATIO);
-    imshow("imageOrg",img1);
-    imshow("image1",i1);
-    imshow("imageOrg2",img2);
-    imshow("image2",i2);
-    cout << "remap i1 size" << i1.cols <<" " << i1.rows << endl;
-    cout << "remap i2 size" << i2.cols <<" " << i2.rows << endl;
-    waitKey();
-    destroyAllWindows();
-*/
 
-/*
-    string img1Path = CHESSBOARDKULAIMAGES;
-    img1Path.append("leftUndistorted.png");
-    imwrite(img1Path,i1);
-    img1Path = CHESSBOARDKULAIMAGES;
-    img1Path.append("rightUndistorted.png");
-    imwrite(img1Path,i2);
-
-
-    int rows = i1.rows;
-    int cols = i2.cols;
-    Mat dst = cv::Mat(rows, 2 * cols, i1.type());
-    cv::Mat tmp = dst(cv::Rect(0, 0, cols, rows));
-    i1.copyTo(tmp);
-    tmp = dst(cv::Rect(cols, 0, cols, rows));
-    i2.copyTo(tmp);
-    imwrite("rectifiedNoShift.png",dst);
-*/
 
     cout << "DONE " << endl;
     matPair returnPair;

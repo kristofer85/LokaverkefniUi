@@ -68,35 +68,5 @@ public:
     cv::String GetRGB();
     DepthMapSettings dispSet;
 
-    //testing disparity refinement
-    const float EVAL_BAD_THRESH = 1.f;
-    const int EVAL_TEXTURELESS_WIDTH = 3;
-    const float EVAL_TEXTURELESS_THRESH = 4.f;
-    const float EVAL_DISP_THRESH = 1.f;
-    const float EVAL_DISP_GAP = 2.f;
-    const int EVAL_DISCONT_WIDTH = 9;
-    const int EVAL_IGNORE_BORDER = 10;
-
-    void computeTextureBasedMasks( const cv::Mat& _img, cv::Mat* texturelessMask, cv::Mat* texturedMask,
-                 int texturelessWidth, float texturelessThresh);
-    void checkTypeAndSizeOfDisp( const cv::Mat& dispMap, const cv::Size* sz );
-    void checkTypeAndSizeOfMask( const cv::Mat& mask, cv::Size sz );
-    void checkDispMapsAndUnknDispMasks( const cv::Mat& leftDispMap, const cv::Mat& rightDispMap,
-                                        const cv::Mat& leftUnknDispMask, const cv::Mat& rightUnknDispMask );
-    void computeOcclusionBasedMasks(const cv::Mat& leftDisp,const  cv::Mat& _rightDisp,cv::Mat* occludedMask,cv::Mat* nonOccludedMask,const cv::Mat& leftUnknDispMask,const cv::Mat& rightUnknDispMask,float dispThresh);
-    void computeDepthDiscontMask( const cv::Mat& disp, cv::Mat& depthDiscontMask, const cv::Mat& unknDispMask,
-                                     float dispGap, int discontWidth);
-    cv::Mat getBorderedMask( cv::Size maskSize, int border);
-    float dispRMS( const cv::Mat& computedDisp, const cv::Mat& groundTruthDisp, const cv::Mat& mask );
-    float badMatchPxlsFraction( const cv::Mat& computedDisp, const cv::Mat& groundTruthDisp, const cv::Mat& mask,
-                                float _badThresh);
-
-    void fillOcclusion(cv::Mat& src, int invalidvalue);// for disparity map
-    void fillOcclusionDepth(cv::Mat& src, int invalidvalue);//for depth map
-    void fillOcclusionDepth(cv::Mat& depth, cv::Mat& image, int invalidvalue, int threshold);
-    void jointColorDepthFillOcclusion(const cv::Mat& src, const cv::Mat& guide, cv::Mat& dest, const cv::Size ksize, double threshold);
-    //remove Streaking Noise in stereo DP matching and hole filling function
-    void removeStreakingNoise(cv::Mat& src, cv::Mat& dest, int th);
-
 };
 #endif // DEPTHMAP_H

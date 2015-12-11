@@ -7,32 +7,22 @@ Rectify::Rectify(matPair inputPair)
     RectPair.right = inputPair.right;
     qDebug()<<"finding local maxima";
     RectPair = LocalMaxima(RectPair);
-    imwrite("../Lokaverkefni2/croped4MaximaL.jpg",RectPair.left);
-    imwrite("../Lokaverkefni2/croped4MaximaR.jpg",RectPair.right);
     qDebug()<<"removing borders";
     RectPair = BorderRemoveal(RectPair);
-    imwrite("../Lokaverkefni2/croped4BorderL.jpg",RectPair.left);
-    imwrite("../Lokaverkefni2/croped4BorderR.jpg",RectPair.right);
     qDebug()<<"gradiant frame";
     RectPair = GradiantFrame(RectPair);
-    imwrite("../Lokaverkefni2/croped4GradiantL.jpg",RectPair.left);
-    imwrite("../Lokaverkefni2/croped4GradiantR.jpg",RectPair.right);
     int top = 0;
     int bottom = 0;
     int left = 0;
     int right = 0;
     qDebug()<<"contour crop diff";
     contourCropDiff(RectPair,left,top,right,bottom);
-    imwrite("../Lokaverkefni2/croped4contourDifL.jpg",RectPair.left);
-    imwrite("../Lokaverkefni2/croped4contourDifR.jpg",RectPair.right);
     top = 0;
     bottom = 0;
     left = 0;
     right = 0;
     qDebug()<<"contour crop gray";
     contourCropGray(RectPair,left,top,right,bottom);
-    imwrite("../Lokaverkefni2/croped4contourGrayL.jpg",RectPair.left);
-    imwrite("../Lokaverkefni2/croped4contourGrayR.jpg",RectPair.right);
 }
 
 matPair Rectify::getCroppedPair()
@@ -42,14 +32,7 @@ matPair Rectify::getCroppedPair()
 
 matPair Rectify::GradiantFrame(matPair images)
 {
-    //First we check if the process has been canceld by setting our
-    //json array to a string.
-    /*
-    if(cropping_instructions->isString())
-    {
-            return images;
-    }
-    */
+
     matPair grayImages;
     cvtColor(images.left, grayImages.left, CV_BGR2GRAY);
     cvtColor(images.right, grayImages.right, CV_BGR2GRAY);
@@ -70,31 +53,11 @@ matPair Rectify::GradiantFrame(matPair images)
             qDebug()<<"--------------------------------------\n\n\n\n\ndidnt scale the image since it was too smal\n\n\n\n--------------------------------------";
             heightScale = 1;
     }
-    //Figure out where we need to place our orgin to match the orginal images by iterating
-    //over the instuctions in the json
 
-    //bleh
-    //origins shiftedOrigins = getShiftedOrigins(images,*cropping_instructions);
 
 
     shiftInfo info = gradiantShiftAndDistortion(grayImages);
-    //Mat new_left= Mat::zeros(images[0].size().height, images[0].size().width, images[0].type());
-    //Mat new_right = Mat::zeros(images[1].size().height, images[1].size().width, images[1].type());
-    //elliptic_transformation(images[0],new_left,info.distortion/images[0].cols,shiftedOrigins.left.x,shiftedOrigins.left.y);
-    //elliptic_transformation(images[1],new_right,info.distortion/images[1].cols,shiftedOrigins.right.x, shiftedOrigins.right.y);
-    //Rect distortionROILeft = getBarrelDistortionROI(images[0], info.distortion/images[0].cols, shiftedOrigins.left.x, shiftedOrigins.left.y);
-    //Rect distortionROIRight = getBarrelDistortionROI(images[1], info.distortion/images[1].cols, shiftedOrigins.right.x, shiftedOrigins.right.y);
-    //Rect distortionROI = distortionROILeft & distortionROIRight;
-//
-    //int top = 0;
-    //int right = images[0].cols-(distortionROI.width+distortionROI.x);
-    //int bottom = 0;
-    //int left = distortionROI.x;
-//
-    //new_left = cropImageBorders(new_left,top,right,bottom,left);
-    //new_right = cropImageBorders(new_right,top,right,bottom,left);
-//
-    ////int finalDx = dx*heightScale;
+
     ////Im setting the finalDx to 0 since by the looks of it when we use this function
     ////after local maxima we improove the y coords but mess up the x coords.
     int finalDx = 0;
@@ -149,31 +112,6 @@ matPair Rectify::LocalMaxima(matPair images)
     }
     histogram *hist = new histogram(histogramSize, histogramSize);
 
-    // First we select a (image.size().width()/numberOfSquares)X(images[0].size().height/numberOfSquares)
-    // that has a high standard deviation of color values.
-    //
-    // NOTE: We will need another way of selecting a good square since a blue sky (RGB of (0,0,255) with
-    // white clouds (RGB of (255,255,255)) has a very high deviation but its likely that that square
-    // will have multiple matches.
-    // What we really want to do here is select a square that is probably uniqe.
-    // = ScaleImage::getInstance(340, true)->process(images);
-    // for now we will select the big square that has a border of 1/5,1/5,1/5,1/10 starting at top and going
-    // clockwise, uncomment the loop below for some selection.
-   // double maxStdev = 0;
-   // for (int y = 1; y < numberOfSquares-squareHeight; y++)
-   // {
-   //      for (int x = 0; x < numberOfSquares-squareWidth; x++)
-   //      {
-   //           double tempStdev = getROIStandardDeviation(scaledImages[1],y*scaledImages[1].size().height/numberOfSquares,(x+squareWidth)*scaledImages[1].size().width/numberOfSquares,
-   //                                  (y+squareHeight)*scaledImages[1].size().height/numberOfSquares, x*scaledImages[1].size().width/numberOfSquares);
-   //           if(tempStdev > maxStdev)
-   //       {
-   //                maxStdev = tempStdev;
-   //                maxX = x;
-   //                maxY = y;
-   //       }
-   //      }
-   // }
     qDebug()<<"We are useing (x,y): ("<<maxX<<","<<maxY<<")";
     for(int res = 50; res < 60; res++)
     {

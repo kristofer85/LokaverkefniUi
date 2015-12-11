@@ -36,11 +36,8 @@
 #include <boost/thread/thread.hpp>
 #endif
 
-#include "reprojectimageto3d.h"
 #include "stereocalibrate.h"
-#include "test.h"
 #include "depthmap.h"
-#include "stereoscopicimage.h"
 #include "convert.h"
 #include "visualizer.h"
 #include "rectify.h"
@@ -104,7 +101,7 @@ private slots:
 
     void on_minDispText_textChanged(const QString &arg1);
 
-    void on_speckleSizeText_textEdited(const QString &arg1);
+    //void on_speckleSizeText_textEdited(const QString &arg1);
 
     void on_speckleSizeText_textChanged(const QString &arg1);
 

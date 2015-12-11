@@ -44,7 +44,6 @@
 #include "stereocalibrate.h"
 
 //#include <QApplication>
-#include "stereoscopicimage.h"
 #include "convert.h"
 
 class Convert

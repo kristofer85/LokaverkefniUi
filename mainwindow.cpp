@@ -12,12 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
     {
-    //mainCloud = new pcl::PointCloud<pcl::PointXYZRGB>;
-    //pointNormal =new pcl::PointCloud<pcl::PointNormal>;
-    //cloud_filtered =new pcl::PointCloud<pcl::PointXYZRGBNormal>;
-                                         //Load Matrix Q
-    //string cameraCal = "stereoCalibration.yml";
-
     dispSet.blockSize = 1;
     dispSet.dif12 = 0;
     dispSet.dispNum = 160;
@@ -33,12 +27,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //pcl::PointCloud<pcl::PointXYZRGB>::Ptr normal (new pcl::PointCloud<pcl::PointXYZRGB>);
 
         ui->setupUi(this);
-        /*
-        PROCESS_MEMORY_COUNTERS pmc;
-        GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-        cout << "current P memory use at begining " << physMemUsedByMe << endl;
-        */
     }
 
 MainWindow::~MainWindow()
@@ -77,12 +65,6 @@ void MainWindow::on_btnLeft_clicked()
      matL.release();
      //small_matL.release();
      QorginalL = QImage();
-     /*
-     PROCESS_MEMORY_COUNTERS pmc;
-     GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-     SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-     cout << "current P memory use after open " << physMemUsedByMe << endl;
-     */
 }
 
 void MainWindow::on_btnProcess_clicked()
@@ -120,12 +102,6 @@ void MainWindow::on_btnProcess_clicked()
         matR.release();
         QmatR = QImage();
         QmatL = QImage();
-        /*
-        PROCESS_MEMORY_COUNTERS pmc;
-        GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-        cout << "current P memory use after process " << physMemUsedByMe << endl;
-        */
 
     }
     else
@@ -141,12 +117,6 @@ void MainWindow::on_pushButton_clicked()
     stereoCalibrate.rectifyCamera();
     stereoCalibrate.clean();
     ui->output->setText("stereo recalibration complete");
-    /*
-    PROCESS_MEMORY_COUNTERS pmc;
-    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-    SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-    cout << "current P memory use after stereo " << physMemUsedByMe << endl;
-    */
 }
 
 void MainWindow::on_btnDepthmap_clicked()
@@ -210,12 +180,6 @@ void MainWindow::on_btnDepthmap_clicked()
         QmatR = QImage();
     }
     depthMap.clean();
-    /*
-    PROCESS_MEMORY_COUNTERS pmc;
-    GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-    SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-    cout << "current P memory use after depthmap " << physMemUsedByMe << endl;
-    */
 }
 
 void MainWindow::on_btnPCL_clicked()
@@ -272,12 +236,6 @@ void MainWindow::on_btnPCL_clicked()
         //------------Main render loop------------
         //   Loop untils pcl viewer is turned off *
         //----------------------------------------
-        /*
-        PROCESS_MEMORY_COUNTERS pmc;
-        GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-        cout << "current P memory use before viewer " << physMemUsedByMe << endl;
-        */
         viewer = true;
         while ( !visualizer.viewer->wasStopped())
         {
@@ -295,14 +253,6 @@ void MainWindow::on_btnPCL_clicked()
     //cv::resize(color,color,Size(),0.50,0.50);
     //cv::resize(color,color,Size(),0.50,0.50);
 
-
-    /*
-    pcl::io::savePCDFileASCII ("test_ply.ply", *mainCloud);
-    //pcl::io::savePCDFile("test_pcd.pcd", mainCloud);
-    pcl::io::savePCDFileBinary("test_pcd.pcd", *mainCloud);
-    pcl::io::savePLYFileASCII("asciiTestPly.ply", *mainCloud);
-    pcl::io::savePLYFileBinary("binaryTestPly.ply", *mainCloud);
-*/
     //mainCloud.reset();
     //pcl::PCLPointCloud2 cloud_blob;
     //pcl::io::loadPCDFile ("SmoothNormals.pcd", cloud_blob);
@@ -322,12 +272,6 @@ void MainWindow::on_btnClose_clicked()
         visualizer.viewer->close();
         visualizer.viewer->removeAllPointClouds();
         visualizer.viewer->removeAllCoordinateSystems();
-        /*
-        PROCESS_MEMORY_COUNTERS pmc;
-        GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));
-        SIZE_T physMemUsedByMe = pmc.WorkingSetSize;
-        cout << "current P memory use after closing viewer " << physMemUsedByMe << endl;
-        */
     }
     else
     {
