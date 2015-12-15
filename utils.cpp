@@ -5,18 +5,27 @@ using namespace std;
 
 //a helper class containing functions from kula code that I modified to work with our project
 
+
+
 matPair Proccess_image(string impath)
 {
 
+    //fixes lens destortion caused by zoom
     Mat zoomCorrected = undestortZoom(impath);
     //orginalImage.release();
     matPair lensCorrected;
     imwrite("zoomCorrect.jpg",zoomCorrected);
+
+    //splits image into left and right image
     lensCorrected = splitImage(zoomCorrected);
     imwrite("splitL.jpg",lensCorrected.left);
     imwrite("splitR.jpg",lensCorrected.right);
+
+    //releases memory used by zoomCorrected
     zoomCorrected.release();
     qDebug()<<"split complete";
+
+    //fixes lens destortion caused by Kula Deeper
     lensCorrected = undestort(lensCorrected);
     imwrite("lensCorrectL.png",lensCorrected.left);
     imwrite("lensCorrectR.png",lensCorrected.right);
@@ -141,6 +150,8 @@ Mat cropImage(Mat img,int finalDx,int finalDy)
 Mat getThresholdedDiff(matPair images, int threshold)
 {
         Mat gauss0, gauss1;
+
+        //Smooths an image using the Gaussian filter. with the kernel size 3x3
         GaussianBlur(images.left, gauss0, Size(3,3),0,0);
         GaussianBlur(images.right, gauss1, Size(3,3),0,0);
         Mat diff(images.left.size(), CV_8UC1);
@@ -174,7 +185,9 @@ Mat thresholdGrayToWhite(Mat image, int grayThreshold, int darkness)
                 for(int i = 0; i != image.rows; i++)
                 {
                         Vec3b pixel = image.at<Vec3b>(i,j);
+                        //gets the pixel with the highest color value
                         uchar maxPixelValue = max(pixel[0], max(pixel[1], pixel[2]));
+                        //gets the pixel with the lowest color value
                         uchar minPixelValue = min(pixel[0], min(pixel[1], pixel[2]));
                         if(maxPixelValue - minPixelValue < grayThreshold && maxPixelValue < darkness)
                         {
@@ -188,6 +201,7 @@ Mat thresholdGrayToWhite(Mat image, int grayThreshold, int darkness)
 
 bool isVerticalRectangle(vector<Point> contour, Mat innerPoints, int * left, int * right)
 {
+        //Calculates the up-right bounding rectangle of a point set.
         Rect contourRect =  boundingRect(contour);
         if(contourRect.x > innerPoints.cols*0.15 && contourRect.x+contourRect.width < innerPoints.cols*0.85)
         {
@@ -209,6 +223,7 @@ bool isVerticalRectangle(vector<Point> contour, Mat innerPoints, int * left, int
                 {
                         *left = 0;
                         *right = 0;
+                        //Calculates all of the moments up to the third order of a polygon or rasterized shape.
                         Moments contourMoments = moments(contour);
                         int centerWidth = (int)(contourMoments.m10/contourMoments.m00);
                         if(centerWidth < innerPoints.cols/2)
@@ -228,9 +243,18 @@ bool isVerticalRectangle(vector<Point> contour, Mat innerPoints, int * left, int
         }
 }
 
+//implements a simple version of a binary search
+//a binary search works in a way that you have some boundrys lets say 1 and 100
+//and you want to find in the least amount of tries a random number between those
+//lets say we pick a random number 75
+//then you check if it is half way between those two or 50 if it is higher 50 then
+//lower bound becomes 50 and higher bounds stays 100 and you ask next is the number
+//small larger or equal to 75 because the mid value between 50 an 100 is 75 and so on
+//until you find it or lower bound and upper bound are the same then that number
+//is not between lower and upper bound
 int binarySearch(int lowerBound, int upperBound, double x , void * params,double(*f)(int, void *))
 {
-
+        //while you are not in the middle
         while(upperBound>lowerBound)
         {
                 int m = (upperBound + lowerBound)/2;
