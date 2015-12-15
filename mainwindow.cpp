@@ -231,11 +231,11 @@ void MainWindow::on_btnPCL_clicked()
         cout << "size is " << color.rows << " X " << color.cols << endl;
         utilities.matToCloud(color,disparity,Q,mainCloud);
 
-        mainCloud = utilities.SOR_filter(mainCloud);
+        //mainCloud = utilities.SOR_filter(mainCloud);
         utilities.smoothNormals(mainCloud);
-        if(visualizer.displayPoly == false && visualizer.displayPoints == true)
+        if(visualizer.displayPoly == false)
             visualizer.viewer = visualizer.displayPointCloudColor(mainCloud,color);      // view point cloud
-        else if(visualizer.displayPoly == true && visualizer.displayPoints == false)
+        else
             visualizer.viewer = visualizer.displayPolyMesh(mainCloud,triangles,color); // view polyMesh
         mainCloud->clear();
         QImage QmatR = matToQImage(disparity);
@@ -276,6 +276,7 @@ void MainWindow::on_btnClose_clicked()
     {
         visualizer.viewer->close();
         visualizer.viewer->removeAllPointClouds();
+        visualizer.viewer->removePolygonMesh();
         visualizer.viewer->removeAllCoordinateSystems();
     }
     else
