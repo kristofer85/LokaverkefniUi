@@ -42,14 +42,11 @@ public:
     // viewer = displayPointCloudColor || displaypolygonMesh
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
     bool displayPoly;
-    bool displayPoints;
     //Display point cloud
     boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPointCloudColor (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud,cv::Mat color);
     //Display polygon mesh
     boost::shared_ptr<pcl::visualization::PCLVisualizer> displayPolyMesh (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud,pcl::PolygonMesh triangles, cv::Mat color);
-    cv::FileStorage fs;
-    std::string cameraCal;
-    cv::Mat Q;
+
 private:
     int renderFrameWidth;
     int renderFrameHeight;

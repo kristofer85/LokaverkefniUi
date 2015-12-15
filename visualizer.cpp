@@ -7,13 +7,15 @@ using namespace pcl::visualization;
 Visualizer::Visualizer()
 {
     displayPoly = false;        // Render polygonMesh
-    displayPoints = true;    // Render point cloud
 
     // default PCL window size
     renderFrameWidth = 1024;
     renderFrameHeight = 1024;
 }
 // This function displays point cloud with color information
+// The parameter Mat color is passed with this function only to be able to resize the render window to be
+// the same as the image viwed, the reason for this was to save screenshots from the window as quick and durty
+// rendering method.
 boost::shared_ptr<PCLVisualizer> Visualizer::displayPointCloudColor (PointCloud<PointXYZRGB>::ConstPtr cloud,Mat color)
 {
     // makes a instance of PCLVisualizer
