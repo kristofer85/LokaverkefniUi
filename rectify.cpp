@@ -95,6 +95,7 @@ matPair Rectify::LocalMaxima(matPair images)
             squareWidth = (facesROI[2]*numberOfSquares)/images.left.size().width;
             squareHeight = (facesROI[3]*numberOfSquares)/images.left.size().height;
     }
+    //creates a blank histogram that is 121X121 big
     histogram *hist = new histogram(histogramSize, histogramSize);
 
     qDebug()<<"We are useing (x,y): ("<<maxX<<","<<maxY<<")";
@@ -102,13 +103,22 @@ matPair Rectify::LocalMaxima(matPair images)
     {
          // Now we search for the local maxima of the image scaled to a resolution of res.
          matPair scaledImages;
+         //scale left and right images
          scaledImages.left = ScaleImage(images.left,res, true);
          scaledImages.right = ScaleImage(images.right,res, true);
+
+         //returns a vector with the local maxima (peaks) of the input images.
+         //A local peak is a data sample that is either larger than
+         //its two neighboring samples or is equal to Inf.
+         //Non-Inf signal endpoints are excluded. If a peak is flat,
+         //the function returns only the point with the lowest index.
          vector<Vec2i> pointsVector = findLocalMaxima(scaledImages.left,scaledImages.right,-scaledImages.left.size().width/10,(scaledImages.left.size().width*2)/3,-scaledImages.left.size().height/5,scaledImages.left.size().height/5,
                                       0.75,0.125,0,(maxY*scaledImages.right.size().height)/numberOfSquares,scaledImages.left.size().width-1,((maxX+squareWidth)*scaledImages.right.size().width)/numberOfSquares,
                                       scaledImages.left.size().height-1,((maxY+squareHeight)*scaledImages.right.size().height)/numberOfSquares,0,(maxX*scaledImages.right.size().width)/numberOfSquares,15);
          histogramScaleX = histogramSize/(double)((2*scaledImages.left.size().width)-1);
          histogramScaleY = histogramSize/(double)((2*scaledImages.right.size().height)-1);
+
+         //adds points from pointsVector into the histogram
          while(pointsVector.size() != 0)
          {
                hist->add(pointsVector.back()[0]*histogramScaleX+(histogramSize/2), pointsVector.back()[1]*histogramScaleY+(histogramSize/2));
@@ -123,7 +133,10 @@ matPair Rectify::LocalMaxima(matPair images)
     histogramScaleY = histogramSize/(double)((2*images.left.size().height)-1);
 
     int dy = hist->getHighestColumn();
+
+    //get the middle value of the collum dy
     int dx = hist->getMedianOfColumn(dy);
+    //get the middle value of the row dx
     dy = hist->getMedianOfRow(dx);
     qDebug()<<"Median value:(x,y): ("<<dx<<","<<dy<<")";
     dx = (dx-(histogramSize/2))/histogramScaleX;
@@ -132,6 +145,7 @@ matPair Rectify::LocalMaxima(matPair images)
     qDebug()<<"Shift by"<<dx<<dy;
     qDebug()<<hist->toString();
 
+    //crops the images based on dx and dy
     images.left = cropImage(images.left,dx,-dy);
     images.right = cropImage(images.right,-dx,dy);
 

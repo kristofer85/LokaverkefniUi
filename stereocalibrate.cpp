@@ -23,12 +23,6 @@ StereoCalibrate::StereoCalibrate()//
     //patternSize = 5;
 }
 
-<<<<<<< HEAD
-//releases the memory used by the variables in this class and sets them to null
-=======
-//  deallocates allocated memory for the following Mats
-// clears vectors containing corner positions for CameraCalibration
->>>>>>> origin/master
 void StereoCalibrate::clean()
 {
     ChessHd.release();
@@ -294,17 +288,10 @@ Rect computeROI(Size2i src_sz, Ptr<StereoMatcher> matcher_instance)
     Rect r(xmin, ymin, xmax - xmin, ymax - ymin);
     return r;
 }
-<<<<<<< HEAD
-//this function takes an image pair and then using matrixes from rectifyCamera
-//along with the camera matrixes takes takes each pixel in the left and right
-//image and remaps them based on the matrixes it then returns an image pair that
-//has been remaped so that each pixel on the right image is in same height as
-//the pixel on the left image that it corresponds to
-=======
+
 
 // Gets parameters from filestorage to call initUndistortRectifyMap
 // return a pair of new images
->>>>>>> origin/master
 matPair StereoCalibrate::initUndistort(matPair Pair)
 {
     img1 = Pair.left;

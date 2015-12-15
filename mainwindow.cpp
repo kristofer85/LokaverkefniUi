@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
     {
+    //we start by intializing the dispSet parameters
     dispSet.blockSize = 1;
     dispSet.dif12 = 0;
     dispSet.dispNum = 160;
@@ -15,12 +16,15 @@ MainWindow::MainWindow(QWidget *parent) :
     dispSet.speckleRange = 2;
     dispSet.speckleSize = 200;
     dispSet.unique = 0;
+
     string cameraCal = "../lokaverkefniUi/Q.xml";
+    //load the contents the xml file Q.xml into the matrix Q
     FileStorage fs = FileStorage(cameraCal, FileStorage::READ);  
     fs["Q"] >> Q;
     fs.release();
     //pcl::PointCloud<pcl::PointXYZRGB>::Ptr normal (new pcl::PointCloud<pcl::PointXYZRGB>);
 
+        //initialize the UI
         ui->setupUi(this);
     }
 
@@ -30,6 +34,7 @@ MainWindow::~MainWindow()
 }
 QImage MainWindow::matToQImage(cv::Mat mat)
 {
+    //here you first check the image is grayscale or a color image
     if(mat.channels() == 1) {                   // if grayscale image
         return QImage((uchar*)mat.data, mat.cols, mat.rows, mat.step, QImage::Format_Indexed8);     // declare and return a QImage
     } else if(mat.channels() == 3) {            // if 3 channel color image
@@ -40,58 +45,93 @@ QImage MainWindow::matToQImage(cv::Mat mat)
     }
     return QImage();        // return a blank QImage if the above did not work
 }
-
+//if you click the opna button
 void MainWindow::on_btnLeft_clicked()
 {
-
+    //opens up a openFile dialog after you pick an image
+    //the variable strFileName becomes the file path
+    //to that image
     strFileName = QFileDialog::getOpenFileName();       // bring up open file dialog
 
 
 
     Mat matL = cv::imread(strFileName.toStdString());        // open image
+    //sets the text in the label Impath as the content of
+    //strFileName
     ui->Impath->setText(strFileName);
     Mat small_matL;
+    //resize the image
     cv::resize(matL,matL,Size(),0.25,0.25);
-     QImage QorginalL = matToQImage(matL);         // convert original and Canny images to QImage
-     ui->picL->setPixmap(QPixmap::fromImage(QorginalL));   // show original and Canny images on labels
-     ui->statusL->setText("unProcessed image");
-     opened = true;
-     processed = false;
-     matL.release();
-     //small_matL.release();
-     QorginalL = QImage();
-}
 
+    //turns image from an openCV mat to a Qt QImage
+    QImage QorginalL = matToQImage(matL);
+    //show the QImage QorginalL in the UI label picL
+    ui->picL->setPixmap(QPixmap::fromImage(QorginalL));
+    //set the text in the UI label statusL as "unProcessed image"
+    ui->statusL->setText("unProcessed image");
+    //set a bool variable that says that you opened an unProcessed image as true
+    opened = true;
+    //set a bool variable that says if the image has been proccessed or not as false
+    processed = false;
+    matL.release();
+    //small_matL.release();
+    //nulls the Qimage and returns the memory alocated to it
+    QorginalL = QImage();
+}
+//if you click the vinna mynd button
 void MainWindow::on_btnProcess_clicked()
 {
+    //checks if you have already prosessed the image so clicking
+    //the vinna mynd button two times in a row will cause
     if(processed == true)
     {
         ui->output->setText("this image has already been proccessed");
     }
     else if(opened == true)
     {
+        //converts the Qstring variable strFileName into a std String
         string impath = strFileName.toStdString();
+
+        //runs image through following stages
+        //1 undestortZoom where the undestortion caused by zoom will be fixed
+        //2 splitImage that splits the sterioscopic image into left and right image
+        //3 undestort that fixes lens destortion caused by Kula Deeper
+        //and then returns an image pair where lens distortion has been fixed
         lensUndestortedPair = Proccess_image(impath);
+
         cout << "first stage proccessing complete" << endl;
         imwrite("leftLensCor.png", lensUndestortedPair.left);
         imwrite("rightLensCor.png", lensUndestortedPair.right);
+
+        //remaps the pixels in the image pair to rectify differences between
+        //left and right image
         correctedPair = stereoCalibrate.initUndistort(lensUndestortedPair);
+
+        //releses memory used by mats
         lensUndestortedPair.left.release();
         lensUndestortedPair.right.release();
+        //
         Rectify croped(correctedPair);
-        //matPair proccessedPair
+
+        //gets image pair that has been been rectified and croped using Rectify
         correctedPair= croped.getCroppedPair();
         Mat matL,matR;
         cv::resize(correctedPair.left,matL,Size(),0.25,0.25);
         cv::resize(correctedPair.right,matR,Size(),0.25,0.25);
+
+        //converts opencv mats to QImage
         QImage QmatL = matToQImage(matL);
         QImage QmatR = matToQImage(matR);
         qDebug()<<"done making Qmats";
+
+
         ui->picL->setPixmap(QPixmap::fromImage(QmatL));
         ui->picR->setPixmap(QPixmap::fromImage(QmatR));
         ui->statusL->setText("corrected left");
         ui->statusR->setText("corrected right");
         ui->output->setText("image undestort complete");
+
+        //set a bool variable that says if the image has been proccessed or not as true
         processed = true;
         matL.release();
         matR.release();
@@ -104,16 +144,17 @@ void MainWindow::on_btnProcess_clicked()
         ui->output->setText("Image has not been selected please select an image to proccess");
     }
 }
-
+//if you click the stereo button
 void MainWindow::on_pushButton_clicked()
 {
+    //sends in the xml file Y.xml
     stereoCalibrate.findAndDrawChessBoardCorners("../lokaverkefniUi/Y.xml");
     stereoCalibrate.CalibrateStereoCamera();
     stereoCalibrate.rectifyCamera();
     stereoCalibrate.clean();
     ui->output->setText("stereo recalibration complete");
 }
-
+//if you click the dýptarmynd button
 void MainWindow::on_btnDepthmap_clicked()
 {
     if(img1Chosen == true && img2Chosen == true)
