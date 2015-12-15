@@ -125,6 +125,7 @@ matPair Rectify::LocalMaxima(matPair images)
                pointsVector.pop_back();
          }
     }
+    //if there are no elements in the histogram it returns the image as it is
     if(hist->numberOfElements() == 0)
     {
           return images;
@@ -132,9 +133,10 @@ matPair Rectify::LocalMaxima(matPair images)
     histogramScaleX = histogramSize/(double)((2*images.left.size().width)-1);
     histogramScaleY = histogramSize/(double)((2*images.left.size().height)-1);
 
+    //get the highest column
     int dy = hist->getHighestColumn();
 
-    //get the middle value of the collum dy
+    //get the middle value of the column dy
     int dx = hist->getMedianOfColumn(dy);
     //get the middle value of the row dx
     dy = hist->getMedianOfRow(dx);
@@ -161,12 +163,21 @@ void Rectify::contourCropDiff(matPair images, int &left, int &top, int &right, i
         Mat diff = getThresholdedDiff(images);
         vector<vector<Point> > contours;
         vector<Vec4i> hierarchy;
+        //finds shapes in the image
+
+        //CV_RETR_LIST retrieves all of the contours without establishing any hierarchical relationships.
+        //CV_CHAIN_APPROX_SIMPLE compresses horizontal, vertical, and diagonal segments
+        //and leaves only their end points. For example, an up-right rectangular contour is encoded with 4 points.
+        //CV_RETR_TREE retrieves all of the contours and reconstructs a full hierarchy of nested contours.
         findContours(diff, contours,hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+
         for (int i = 0; i< contours.size();i++)
         {
+                //checks if the calculateed contour area is bigger than diff.cols*diff.rows*0.02
                 if(contourArea(contours[i]) > diff.cols*diff.rows*0.02)
                 {
                         Mat mask = Mat::zeros(diff.size(), CV_8UC1);
+                        //Draws contours outlines or filled contours.
                         drawContours(mask,contours,i,Scalar(255),CV_FILLED);
                         int contourLeft = 0;
                         int contourRight = 0;
@@ -188,14 +199,39 @@ void Rectify::contourCropGray(matPair images, int &left, int &top, int &right, i
         bottom = 0;
         left = 0;
         right = 0;
-
+        //shapes and seperate areas in left image
         vector<vector<Point> > contoursL;
+        //shapes and seperate areas in right image
         vector<vector<Point> > contoursR;
+
+        //vectors, containing information about the left amd right image topology.
+        //It has as many elements as the number of contours.
+        //For each i-th contour contours[i] , the elements hierarchy[i][0] ,
+        //hiearchy[i][1] , hiearchy[i][2] , and hiearchy[i][3] are set to
+        //0-based indices in contours of the next and previous contours
+        //at the same hierarchical level, the first child contour and the parent
+        //contour, respectively. If for the contour i there are no next,
+        //previous, parent, or nested contours, the corresponding elements of
+        //hierarchy[i] will be negative
         vector<Vec4i> hierarchyL;
         vector<Vec4i> hierarchyR;
+
+        //replaces all pixels in the input image with luminance greater than set threshold with the value for white (white)
         Mat grayThresholdL = thresholdGrayToWhite(images.left);
         Mat grayThresholdR = thresholdGrayToWhite(images.right);
+        //finds shapes in the image
+
+        //CV_RETR_LIST retrieves all of the contours without establishing any hierarchical relationships.
+        //CV_CHAIN_APPROX_SIMPLE compresses horizontal, vertical, and diagonal segments
+        //and leaves only their end points. For example, an up-right rectangular contour is encoded with 4 points.
+        //CV_RETR_TREE retrieves all of the contours and reconstructs a full hierarchy of nested contours.
         findContours(grayThresholdL, contoursL,hierarchyL, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
+        //finds shapes in the image
+
+        //CV_RETR_LIST retrieves all of the contours without establishing any hierarchical relationships.
+        //CV_CHAIN_APPROX_SIMPLE compresses horizontal, vertical, and diagonal segments
+        //and leaves only their end points. For example, an up-right rectangular contour is encoded with 4 points.
+        //CV_RETR_TREE retrieves all of the contours and reconstructs a full hierarchy of nested contours.
         findContours(grayThresholdR, contoursR,hierarchyR, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0,0));
 
                 for (int i = 0; i< contoursL.size();i++)
@@ -226,12 +262,18 @@ void Rectify::contourCropGray(matPair images, int &left, int &top, int &right, i
                 }
                 for (int i = 0; i< contoursR.size();i++)
                 {
+                        //Calculates a contour area.
                         int areaR = contourArea(contoursR[i]);
                         if (contourArea(contoursR[i]) > 0.02*images.right.cols*images.right.rows)
                         {
                                 vector<Point> convex_hull;
+                                //The functions find the convex hull of a 2D point set
+                                //using the Sklansky’s algorithm that has O(N logN)
+                                //complexity in the current implementation.
                                 convexHull(contoursR[i], convex_hull);
+                                //Calculates a contour area.
                                 int convexHullArea = contourArea(convex_hull);
+                                //Calculates the up-right bounding rectangle of a point set.
                                 Rect contourRect = boundingRect(contoursR[i]);
                                 bool isConvex = areaR/(double)convexHullArea > 0.75;
                                 bool isAtTop = contourRect.y < 0.05*images.right.rows;
@@ -251,6 +293,7 @@ void Rectify::contourCropGray(matPair images, int &left, int &top, int &right, i
                         }
 
                 }
+    //crops image pair
     RectPair.left = cropImageBorders(images.left,0,right,0,left);
     RectPair.right = cropImageBorders(images.right,0,right,0,left);
 
