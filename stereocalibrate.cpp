@@ -13,11 +13,17 @@
 using namespace cv;
 using namespace std;
 using namespace cv::ximgproc;
+
+
+//initializes sterio calibrate information patern size as 24 since the the size
+//of the squares the patternwe used is 24 mm wide
 StereoCalibrate::StereoCalibrate()//
 {
     patternSize = 24.0;
     //patternSize = 5;
 }
+
+//releases the memory used by the variables in this class and sets them to null
 void StereoCalibrate::clean()
 {
     ChessHd.release();
@@ -52,6 +58,11 @@ void StereoCalibrate::clean()
     corners2.clear();
     obj.clear();
 }
+//reads in an xml file containing a list of calibration images it then loads each
+//image in that list and checks if it can find a patern 10 squeres wide and 7 squere high
+//if it can find the pattern in both left and right side of the image it then inserts
+//the x and y values of the corners of every square into vectors for left and righ side
+//along with points 3d point for each corner in the pattern
 void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
 {
     numBoards = 24;
@@ -127,6 +138,14 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
     fs.release();
     ChessHd.release();
 }
+
+//uses the points gotten by findAndDrawChessBoardCorners to
+//it starts by loading in on image that has had lens distortion fixed for sample
+//it then  initializes two camera matrixes using the object points and image points
+//it then uses those camera matrixes along with the object and image points to calculate
+//how much points are shifted between left and right image
+//finaly it saves the information about the shifting to a file in to form of several
+//matrixes that will later be used by the function rectifyCamera
 void StereoCalibrate::CalibrateStereoCamera()
 {
     cout << "cutSize is "<< cutSize << endl;
@@ -202,6 +221,9 @@ void StereoCalibrate::CalibrateStereoCamera()
     stereoCalibrationStored << "F" << F;
     stereoCalibrationStored.release();
 }
+
+//this function uses the matrixes that CalibrateStereoCamera created to
+//create seperate rotation and projection matrixes for left and right side
 void StereoCalibrate::rectifyCamera()
 {
     FileStorage stereoCalibrationStored = FileStorage("stereoCalibration.yml", FileStorage::READ);
@@ -241,6 +263,11 @@ Rect computeROI(Size2i src_sz, Ptr<StereoMatcher> matcher_instance)
     Rect r(xmin, ymin, xmax - xmin, ymax - ymin);
     return r;
 }
+//this function takes an image pair and then using matrixes from rectifyCamera
+//along with the camera matrixes takes takes each pixel in the left and right
+//image and remaps them based on the matrixes it then returns an image pair that
+//has been remaped so that each pixel on the right image is in same height as
+//the pixel on the left image that it corresponds to
 matPair StereoCalibrate::initUndistort(matPair Pair)
 {
     img1 = Pair.left;
