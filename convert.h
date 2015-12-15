@@ -48,7 +48,6 @@ class Convert
 {
     public:
         Convert();
-        //pcl::PolygonMesh possitionMesh(pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr cloud);
         pcl::PointCloud<pcl::PointNormal> disparityToPointCloud(cv::Mat color, cv::Mat depth);
         pcl::PointCloud<pcl::PointNormal> smoothNormals(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
 

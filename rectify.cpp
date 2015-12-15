@@ -32,19 +32,16 @@ matPair Rectify::getCroppedPair()
 
 matPair Rectify::GradiantFrame(matPair images)
 {
-
     matPair grayImages;
+    // convert image to grayscale
     cvtColor(images.left, grayImages.left, CV_BGR2GRAY);
     cvtColor(images.right, grayImages.right, CV_BGR2GRAY);
     int heightSize = 350;
     float heightScale = images.left.size().height/(float)heightSize;
-    //cvtColor(images[0],grayImages[0],CV_RGB2GRAY);
-    //cvtColor(images[1],grayImages[1],CV_RGB2GRAY);
+
     if(images.left.size().height>heightSize)
     {
-          qDebug()<<"------------------------------------------\n\n\n\n\n"
-                    <<"image height was"<<images.left.size().height<<"so we scaled it and"
-                      <<"the scale factor is"<<heightScale;
+          qDebug()<<"------------------------------------------\n\n\n\n\n"<<"image height was"<<images.left.size().height<<"so we scaled it and"<<"the scale factor is"<<heightScale;
           grayImages.left = ScaleImage(grayImages.left,heightSize, true);
           grayImages.right = ScaleImage(grayImages.right,heightSize, true);
     }
@@ -53,21 +50,12 @@ matPair Rectify::GradiantFrame(matPair images)
             qDebug()<<"--------------------------------------\n\n\n\n\ndidnt scale the image since it was too smal\n\n\n\n--------------------------------------";
             heightScale = 1;
     }
-
-
-
     shiftInfo info = gradiantShiftAndDistortion(grayImages);
 
-    ////Im setting the finalDx to 0 since by the looks of it when we use this function
-    ////after local maxima we improove the y coords but mess up the x coords.
     int finalDx = 0;
     int finalDy = info.dy*heightScale;
-    //images[0] = cropImage(new_left,finalDx,finalDy);
-    //images[1] = cropImage(new_right,-finalDx,-finalDy);
     images.left = cropImage(images.left,finalDx,finalDy);
     images.right = cropImage(images.right,finalDx,finalDy);
-
-
     return images;
 }
 
@@ -79,11 +67,7 @@ matPair Rectify::LocalMaxima(matPair images)
 
 
     Vec4i facesROI = findROI(images.left);
-    qDebug()<<"\n\n\n\n\n\n\n----------------------------------------------------------------\n"
-              <<"Image size is "<<images.left.size().width<<"x"<<images.left.size().height<<"\n"
-              <<"Found faces in the box with corners ("<<facesROI[0]<<","<<facesROI[1]<<") and ("
-                <<facesROI[2]<<","<<facesROI[3]<<")"
-                <<"\n\n\n\n\n\n\n----------------------------------------------------------------\n";
+    qDebug()<<"\n\n\n\n\n\n\n----------------------------------------------------------------\n"<<"Image size is "<<images.left.size().width<<"x"<<images.left.size().height<<"\n"<<"Found faces in the box with corners ("<<facesROI[0]<<","<<facesROI[1]<<") and ("<<facesROI[2]<<","<<facesROI[3]<<")"<<"\n\n\n\n\n\n\n----------------------------------------------------------------\n";
 
     int numberOfSquares;//Note that this is really the squareroot of the number of squares.
                               //Also since we dont want to select the squares in the border
@@ -94,7 +78,8 @@ matPair Rectify::LocalMaxima(matPair images)
     int maxY;
     int squareWidth;
     int squareHeight;
-    if (facesROI[2] == 0 || facesROI[3] == 0) //the faces roi has width or height 0 so its empty
+    //the faces roi has width or height 0 so its empty
+    if (facesROI[2] == 0 || facesROI[3] == 0)
     {
             numberOfSquares = 10;
             maxX = 1;
@@ -115,8 +100,7 @@ matPair Rectify::LocalMaxima(matPair images)
     qDebug()<<"We are useing (x,y): ("<<maxX<<","<<maxY<<")";
     for(int res = 50; res < 60; res++)
     {
-     //Now we search for the local maxima of the image scaled to
-         //a resolution of res.
+         // Now we search for the local maxima of the image scaled to a resolution of res.
          matPair scaledImages;
          scaledImages.left = ScaleImage(images.left,res, true);
          scaledImages.right = ScaleImage(images.right,res, true);
@@ -127,8 +111,7 @@ matPair Rectify::LocalMaxima(matPair images)
          histogramScaleY = histogramSize/(double)((2*scaledImages.right.size().height)-1);
          while(pointsVector.size() != 0)
          {
-               hist->add(pointsVector.back()[0]*histogramScaleX+(histogramSize/2),
-                        pointsVector.back()[1]*histogramScaleY+(histogramSize/2));
+               hist->add(pointsVector.back()[0]*histogramScaleX+(histogramSize/2), pointsVector.back()[1]*histogramScaleY+(histogramSize/2));
                pointsVector.pop_back();
          }
     }
@@ -136,16 +119,8 @@ matPair Rectify::LocalMaxima(matPair images)
     {
           return images;
     }
-    //Vec2i maximum = hist->max();
-    //qDebug()<<"histogram max:"<<maximum[0]<<maximum[1];
     histogramScaleX = histogramSize/(double)((2*images.left.size().width)-1);
     histogramScaleY = histogramSize/(double)((2*images.left.size().height)-1);
-
-    //qDebug()<<(maximum[0]-1-(histogramSize/2))<<histogramScaleX;
-    //qDebug()<<(maximum[1]-1-(histogramSize/2))<<histogramScaleY;
-
-    //int dx = (maximum[0]-(histogramSize/2))/histogramScaleX;
-    //int dy = (maximum[1]-(histogramSize/2))/histogramScaleY;
 
     int dy = hist->getHighestColumn();
     int dx = hist->getMedianOfColumn(dy);
@@ -159,10 +134,6 @@ matPair Rectify::LocalMaxima(matPair images)
 
     images.left = cropImage(images.left,dx,-dy);
     images.right = cropImage(images.right,-dx,dy);
-
-    //delete hist;
-
-
 
     return images;
 }
@@ -196,7 +167,7 @@ void Rectify::contourCropDiff(matPair images, int &left, int &top, int &right, i
 }
 
 
-//Post: left, top, right and bottom contain the cropping info for the images.
+//left, top, right and bottom contain the cropping info for the images.
 void Rectify::contourCropGray(matPair images, int &left, int &top, int &right, int &bottom)
 {
         top = 0;
@@ -238,7 +209,6 @@ void Rectify::contourCropGray(matPair images, int &left, int &top, int &right, i
                                         }
                                 }
                         }
-
                 }
                 for (int i = 0; i< contoursR.size();i++)
                 {

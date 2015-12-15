@@ -52,25 +52,37 @@ void StereoCalibrate::clean()
     corners2.clear();
     obj.clear();
 }
+
+// this algorithm finds corners of chessboard image pair.
+// If found a circle is drawn around all found corners.
 void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
 {
-    numBoards = 24;
-    board_w = 10;
-    board_h = 7;
-    board_sz = Size(board_w, board_h);
-    board_n = board_w*board_h;
+    numBoards = 24;             // Number of images from right and left
+    board_w = 10;                   // pattern size width
+    board_h = 7;                      // pattern size height
+    board_sz = Size(board_w, board_h);          // Size of pattern  Size(width,height)
+    board_n = board_w*board_h;                        // Number of corners to be found
+
     FileStorage fs;
     fs.open(filename, FileStorage::READ);
     if (!fs.isOpened()){cerr << "Failed to open " << filename << endl;}
+
     FileNode n = fs["images"];                         // Read string sequence - Get node
+
     if (n.type() != FileNode::SEQ){cerr << "strings is not a sequence! FAIL" << endl;}
+
     string ChessboardImageList,left, right;
-    FileNodeIterator it = n.begin(), it_end = n.end(); // Go through the node
+
+     // Go through the node
+    FileNodeIterator it = n.begin(), it_end = n.end();
     int success = 0;
     bool first = true;
+
+    // make vector of world corrdinates where Z is always 0
     for (int i=0; i<board_h; i++)
         for (int j=0; j<board_w; j++)
             obj.push_back(Point3f(i *patternSize, j *patternSize, 0.0f));
+
     for (; it != it_end; ++it)
     {
         //ChessboardImageList = CHESSBOARDIMAGES;
@@ -80,12 +92,14 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
         imSize = ChessHd.size();
         img1 = ChessHd(Range(0, imSize.height),Range(0, imSize.width/2)).clone();
         img2 = ChessHd(Range(0, imSize.height),Range(imSize.width/2, imSize.width)).clone();
-        //resize(img1,img1,Size(),0.25,0.25);
-        //resize(img2,img2,Size(),0.25,0.25);
+
+        // resize images
         resize(img1,img1,Size(),0.50,0.50);
         resize(img2,img2,Size(),0.50,0.50);
-        //cout << "chessboard img size" << img1.cols <<" " << img1.rows << endl;
+
         cutSize = img1.size();
+
+        //  This algorith only accepts grayscale images
         cvtColor(img1,gray1,CV_RGB2GRAY);
         cvtColor(img2,gray2,CV_RGB2GRAY);
 
@@ -93,13 +107,14 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
         bool found2 = false;
         found1 = findChessboardCorners(img1, board_sz, corners1, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
         found2 = findChessboardCorners(img2, board_sz, corners2, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
-        //found1 = findChessboardCorners(img1, board_sz, corners1, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
-        //found2 = findChessboardCorners(img2, board_sz, corners2, CALIB_CB_ADAPTIVE_THRESH | CALIB_CB_NORMALIZE_IMAGE);
+
+        // if found get Subpixel accuracy
         if (found1)
         {
             cornerSubPix(gray1, corners1, Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
             drawChessboardCorners(img1, board_sz, corners1, found1);
         }
+        // if found get Subpixel accuracy
         if (found2)
         {
             cornerSubPix(gray2, corners2, Size(11, 11), Size(-1, -1), TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
@@ -127,6 +142,7 @@ void StereoCalibrate::findAndDrawChessBoardCorners(string filename)
     fs.release();
     ChessHd.release();
 }
+
 void StereoCalibrate::CalibrateStereoCamera()
 {
     cout << "cutSize is "<< cutSize << endl;

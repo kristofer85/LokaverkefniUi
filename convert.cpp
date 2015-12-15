@@ -4,17 +4,21 @@ using namespace std;
 using namespace boost;
 using namespace pcl;
 using namespace pcl::visualization;
+
+
+// converts q which is a ray that intersects the image plane at (x,y,f) for all x and y
+// of the image into (X,Y,Z) corrdinates.
 Convert::Convert(){}
 PointCloud<PointXYZRGB>::Ptr Convert::matToCloud(Mat rgb,Mat disp,Mat Q,PointCloud<PointXYZRGB>::Ptr Cloud)
 {
-    double px, py, pz;
-    uchar pr, pg, pb;
+    double px, py, pz;                                         // x,y,z position for each pixel
+    uchar pr, pg, pb;                                           // represents rgb color information at each pixel
     double Q03, Q13, Q23, Q32, Q33;
-    Q03 = Q.at<double>(0,3);
-    Q13 = Q.at<double>(1,3);
-    Q23 = Q.at<double>(2,3);
-    Q32 = Q.at<double>(3,2);
-    Q33 = Q.at<double>(3,3);
+    Q03 = Q.at<double>(0,3);                     //Fx
+    Q13 = Q.at<double>(1,3);                       //Fy
+    Q23 = Q.at<double>(2,3);                      //Cx
+    Q32 = Q.at<double>(3,2);                      //Cy
+    Q33 = Q.at<double>(3,3);                     // (Cx - C´x)/Tx
     for (int i = 0; i < rgb.rows; i++)
     {
         uchar* rgb_ptr = rgb.ptr<uchar>(i);
@@ -22,7 +26,7 @@ PointCloud<PointXYZRGB>::Ptr Convert::matToCloud(Mat rgb,Mat disp,Mat Q,PointClo
         for (int j = 0; j < rgb.cols; j++)
         {
             uchar d = disp_ptr[j];
-            if ( d == 0 ) continue; //Discard bad pixels
+            if ( d == 0 ) continue;                            // If the depth value is 0 dDiscard the pixel
             double pw = 1.0 * static_cast<double>(d) * Q32 + Q33;
             px = static_cast<double>(j) + Q03 ;
             py = static_cast<double>(i) + Q13 ;
@@ -39,12 +43,12 @@ PointCloud<PointXYZRGB>::Ptr Convert::matToCloud(Mat rgb,Mat disp,Mat Q,PointClo
             point.x = px;
             point.y = py;
             point.z = pz;
-            uint32_t rgb = (static_cast<uint32_t>(pr) << 16 |
-                    static_cast<uint32_t>(pg) << 8 | static_cast<uint32_t>(pb));
+            uint32_t rgb = (static_cast<uint32_t>(pr) << 16 | static_cast<uint32_t>(pg) << 8 | static_cast<uint32_t>(pb));
             point.rgb = *reinterpret_cast<float*>(&rgb);
             Cloud->points.push_back (point);
         }
     }
+    // prints out the values from the Q matrix
     for (int y = 0; y < Q.rows; y++)
     {
       const double* Qy = Q.ptr<double>(y);
@@ -53,10 +57,16 @@ PointCloud<PointXYZRGB>::Ptr Convert::matToCloud(Mat rgb,Mat disp,Mat Q,PointClo
         std::cout << "Q(" << x << "," << y << ") = " << Qy[x] << std::endl;
       }
     }
-    Cloud->width = (int) Cloud->points.size();
+
+    Cloud->width = (int) Cloud->points.size();          // Sets point cloud width
     Cloud->height = 1;
     return Cloud;
 }
+
+// This function tries to recreate missing parts of the surface by higher order
+// polynomial interpolations between the surrounding data points. By performing resampling,
+// these small errors can be corrected and the “double walls” artifacts resulted from
+// registering multiple scans together can be smoothed.
 pcl::PointCloud<pcl::PointNormal> Convert::smoothNormals(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
     // Create a KD-Tree
@@ -75,6 +85,12 @@ pcl::PointCloud<pcl::PointNormal> Convert::smoothNormals(pcl::PointCloud<pcl::Po
    // pcl::io::savePCDFile ("SmoothNormals.pcd", mls_points);
     return (mls_points);
 }
+
+// Our sparse outlier removal is based on the computation of the distribution of point to neighbors
+// distances in the input dataset. For each point, we compute the mean distance from it to all its neighbors.
+// By assuming that the resulted distribution is Gaussian with a mean and a standard deviation, all points
+// whose mean distances are outside an interval defined by the global distances mean and standard
+// deviation can be considered as outliers and trimmed from the dataset.
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr Convert::SOR_filter(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr filter (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -86,14 +102,21 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Convert::SOR_filter(pcl::PointCloud<pcl::
     cloud->clear();
     return filter;
 }
+
+// This function takes a list of points an draws polygons between them In the begining
+//  one point is selected and looks for two points witch have the shortest distance from the
+// selected point. The algorithm keeps running until there are no more valid  points.
 pcl::PolygonMesh Convert::triangulate(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
 {
+    // polygon normal is a vector that is perpendicular to a single polygon.
     pcl::NormalEstimation<pcl::PointXYZRGB, pcl::Normal> n;
     pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+    // KdTree is a search method that searches nearest point for x,y and z dimensions
     pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB>);
     tree->setInputCloud (cloud);
     n.setInputCloud (cloud);
     n.setSearchMethod (tree);
+    // set maximum distance to next normal
     n.setKSearch (200);
     n.compute (*normals);
     // Concatenate the XYZRGB and normal fields
@@ -102,6 +125,7 @@ pcl::PolygonMesh Convert::triangulate(pcl::PointCloud<pcl::PointXYZRGB>::Ptr clo
     pcl::PolygonMesh polygon;
     pcl::search::KdTree<pcl::PointXYZRGBNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointXYZRGBNormal>);
     tree2->setInputCloud (cloud_with_normals);
+    // Triangulation algorithm
     pcl::GreedyProjectionTriangulation<pcl::PointXYZRGBNormal> triangulation;
      //Set the maximum distance between connected points (maximum edge length)
     triangulation.setSearchRadius (2.0);
