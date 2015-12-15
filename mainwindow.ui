@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>open</string>
+     <string>opna</string>
     </property>
    </widget>
    <widget class="QLabel" name="picL">
@@ -46,7 +46,7 @@
      <enum>QFrame::Box</enum>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -62,7 +62,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Path</string>
+     <string>Slóð</string>
     </property>
    </widget>
    <widget class="QLabel" name="statusL">
@@ -75,7 +75,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>left image</string>
+     <string>vinstri mynd</string>
     </property>
    </widget>
    <widget class="QLabel" name="picR">
@@ -97,7 +97,7 @@
      <enum>QFrame::Box</enum>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string/>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -113,7 +113,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>right image</string>
+     <string>hægri mynd</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnProcess">
@@ -126,7 +126,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>process</string>
+     <string>vinna mynd</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnDepthmap">
@@ -139,7 +139,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>depthmap</string>
+     <string>dýptarmynd</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnPCL">
@@ -183,7 +183,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Message</string>
+     <string>Skilaboð</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton">
@@ -209,7 +209,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Close PCL</string>
+     <string>loka PCL</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
@@ -222,7 +222,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>close program</string>
+     <string>loka forriti</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnOpenLeft">
@@ -235,7 +235,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>open left</string>
+     <string>opna</string>
     </property>
    </widget>
    <widget class="QLabel" name="ImpathL">
@@ -248,7 +248,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Path</string>
+     <string>Slóð</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnOpenRight">
@@ -261,46 +261,46 @@
      </rect>
     </property>
     <property name="text">
-     <string>open right</string>
+     <string>opna</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>380</y>
-      <width>51</width>
-      <height>16</height>
+      <x>10</x>
+      <y>370</y>
+      <width>61</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>raw image</string>
+     <string>óunnin mynd</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>410</y>
-      <width>47</width>
-      <height>13</height>
+      <x>10</x>
+      <y>400</y>
+      <width>61</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>left img</string>
+     <string>vinstri mynd</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>440</y>
-      <width>47</width>
-      <height>13</height>
+      <x>10</x>
+      <y>430</y>
+      <width>61</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>right img</string>
+     <string>hægri mynd</string>
     </property>
    </widget>
    <widget class="QLabel" name="ImpathR">
@@ -313,20 +313,20 @@
      </rect>
     </property>
     <property name="text">
-     <string>Path</string>
+     <string>Slóð</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>470</y>
-      <width>47</width>
-      <height>13</height>
+      <x>6</x>
+      <y>460</y>
+      <width>61</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>disparity</string>
+     <string>dýptarmynd</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btnOpenDisp">
@@ -339,7 +339,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>open disp</string>
+     <string>opna</string>
     </property>
    </widget>
    <widget class="QLabel" name="ImpathDisp">
@@ -352,7 +352,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Path</string>
+     <string>Slóð</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">

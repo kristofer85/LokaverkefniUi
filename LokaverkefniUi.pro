@@ -45,10 +45,7 @@ INCLUDEPATH += C:/msys64/mingw32/include/json
 INCLUDEPATH += C:/msys64/mingw32/include/glib-2.0/
 INCLUDEPATH += C:/msys64/mingw32/include/
 INCLUDEPATH += C:/msys64/mingw32/lib/glib-2.0/include/
-#win32: LIBS += -LC:/msys64/mingw32/i686-w64-mingw32/lib \
- #               -lkernel32 \
-  #              -lpsapi \
-   #             -luser32
+
 win32: LIBS += -LC:/msys64/home/Notandi/vtk/build/install/lib \
                -LC:/msys64/home/Notandi/cloudstuff/pl-build/install/lib \
                -LC:/msys64/home/Notandi/opencv/build2/install/x86/mingw/lib \

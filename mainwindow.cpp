@@ -189,16 +189,37 @@ void MainWindow::on_btnPCL_clicked()
     if(dispChosen == true)
     {
         disparity = imread(strDispImgName.toStdString(), CV_LOAD_IMAGE_GRAYSCALE);
+        Mat tempDisp;
+        if(disparity.rows < 300 || disparity.cols < 400)
+        {
+            cv::resize(disparity,tempDisp,Size(),2.0,2.0);
+            disparity = tempDisp;
+        }
+        else if(disparity.rows > 900 || disparity.cols > 900)
+        {
+            cv::resize(disparity,tempDisp,Size(),0.5,0.5);
+            disparity = tempDisp;
+        }
     }
     else
     {
         disparity = imread("disp8SGBM.png", CV_LOAD_IMAGE_GRAYSCALE);
     }
 
-    Mat color;
+    Mat color,temp;
     if(img1Chosen == true)
     {
         color = imread(strLeftImgName.toStdString());
+        if( color.rows < 300 ||  color.cols < 400)
+        {
+            cv::resize(color,temp,Size(),2.0,2.0);
+            color = temp;
+        }
+        else if( color.rows > 900 ||  color.cols > 900)
+        {
+            cv::resize(color,temp,Size(),0.5,0.5);
+            color = temp;
+        }
     }
     else
     {
@@ -207,6 +228,7 @@ void MainWindow::on_btnPCL_clicked()
 
     if(color.rows == disparity.rows && color.cols == disparity.cols)
     {
+        cout << "size is " << color.rows << " X " << color.cols << endl;
         utilities.matToCloud(color,disparity,Q,mainCloud);
 
         mainCloud = utilities.SOR_filter(mainCloud);
