@@ -23,7 +23,12 @@ StereoCalibrate::StereoCalibrate()//
     //patternSize = 5;
 }
 
+<<<<<<< HEAD
 //releases the memory used by the variables in this class and sets them to null
+=======
+//  deallocates allocated memory for the following Mats
+// clears vectors containing corner positions for CameraCalibration
+>>>>>>> origin/master
 void StereoCalibrate::clean()
 {
     ChessHd.release();
@@ -161,12 +166,27 @@ void StereoCalibrate::CalibrateStereoCamera()
     //resize(img2,img2,Size(),0.25,0.25);
     cout << "calib size" << img1.cols <<" " << img1.rows << endl;
 
+    // provided initial cameramatrix for the CV_CALIB_USE_INTRINSIC_GUESS flag in stereoCalibrate
     CM1 = initCameraMatrix2D(objectpoints,imagePoints1,cutSize,0);
     CM2 = initCameraMatrix2D(objectpoints,imagePoints2,cutSize,0);
     cout << "distCoeff " << D1 << endl;
     cout << "camera1 = " << CM1 << endl;
     cout << "camera2 = " << CM2 << endl;
+    // File storage for Stereo calibrate matrixes
     FileStorage stereoCalibrationStored = FileStorage("stereoCalibration.yml", FileStorage::WRITE);
+    // This function is where the stereo calibration is done, It takes objectpoints that contain vector of obj that contain world
+    //   coord for every corner found starting at X = 0, Y = 0 increasing one patternSize for every corner The Z position is always 0.
+    // imagePoints are the found corners and are mapped to he coord in the obj vectors in objectpoints vector giving us scale.
+    // Cm1 & Cm2 are 3x3 matrix containing  focal length and image center as variables fx,fy,cx and cy.
+    // D1 & D2 are 5x1 matrix containing the distortion matrix of the image.
+    // R = rotation matrix that holds the information of how to rotate the camera to have the same angle as the first one.
+    // T = translate matrix that holds the information of how to translate the camera to have the same position as the first one
+    // The matrix E contains information about the translation and rotation that relate the two cameras in physical space
+    // The matrix F F contains the same information as E in addition to information about the intrinsics of both cameras.
+    // CV_CALIB_FIX_ASPECT_RATIO will kepp the ratio of fx and fy to whatever value is set in the intrinsic_matrix
+    // fl ag turns off fi tting the tangential distortion parameters p1 and
+    // CV_CALIB_ZERO_TANGENT_DIST if this flag is set it turns off fitting the tangential distortion parameters p1 and p2, which are thereby both set to 0.
+    // CV_CALIB_USE_INTRINSIC_GUESS if this flag is set then intrinsic_matrix is assumed to contain valid values that will be used as an initial guess to be further optimized by cvCalibrateCamera2().
     double rms = stereoCalibrate(objectpoints,
                                  imagePoints1,
                                  imagePoints2,
@@ -184,6 +204,8 @@ void StereoCalibrate::CalibrateStereoCamera()
                                  CV_CALIB_SAME_FOCAL_LENGTH
                                  ,
                                  cvTermCriteria(CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5));
+
+    // prints out RMS error
     cout << "done with RMS error=" << rms << endl;
 
     double err = 0;
@@ -211,6 +233,8 @@ void StereoCalibrate::CalibrateStereoCamera()
         npoints += npt;
     }
     cout << "average reprojection err = " <<  err/npoints << endl;
+
+
     stereoCalibrationStored << "CM1" << CM1;
     stereoCalibrationStored << "CM2" << CM2;
     stereoCalibrationStored << "D1" << D1;
@@ -236,6 +260,11 @@ void StereoCalibrate::rectifyCamera()
     cout << "rectify img1 size" << img1.cols <<" " << img1.rows << endl;
     cout << "rectify cutsize" << cutSize.width <<" " << cutSize.height << endl;
     //stereoRectify( CM1, D1, CM2, D2, img1.size(), R, T, R1, R2, P1, P2, Q, CALIB_ZERO_DISPARITY );
+
+    // Return parameters are Rl and Rr, the 3-by-3 row-aligned rectifi cation rotations for the
+    // left and right image planes as derived in the preceding equations. Similarly, we get back
+    // the 3-by-4 left and right projection equations Pl and Pr. An optional return parameter is
+    // Q, the 4-by-4 reprojection matrix
     stereoRectify( CM1, D1, CM2, D2, img1.size(), R, T, R1, R2, P1, P2, Q,0,0,cutSize);
     //stereoRectify( CM1, D1, CM2, D2, img1.size(), R, T, R1, R2, P1, P2, Q,0,0);
 //*******************************
@@ -249,6 +278,8 @@ void StereoCalibrate::rectifyCamera()
     //stereoCalibrationStored << "Q" << Q;
     stereoCalibrationStored.release();
 }
+
+
 Rect computeROI(Size2i src_sz, Ptr<StereoMatcher> matcher_instance)
 {
     int min_disparity = matcher_instance->getMinDisparity();
@@ -263,11 +294,17 @@ Rect computeROI(Size2i src_sz, Ptr<StereoMatcher> matcher_instance)
     Rect r(xmin, ymin, xmax - xmin, ymax - ymin);
     return r;
 }
+<<<<<<< HEAD
 //this function takes an image pair and then using matrixes from rectifyCamera
 //along with the camera matrixes takes takes each pixel in the left and right
 //image and remaps them based on the matrixes it then returns an image pair that
 //has been remaped so that each pixel on the right image is in same height as
 //the pixel on the left image that it corresponds to
+=======
+
+// Gets parameters from filestorage to call initUndistortRectifyMap
+// return a pair of new images
+>>>>>>> origin/master
 matPair StereoCalibrate::initUndistort(matPair Pair)
 {
     img1 = Pair.left;
@@ -289,6 +326,9 @@ matPair StereoCalibrate::initUndistort(matPair Pair)
     //T.at<double>(0) += 50;
     //stereoRectify( CM1, D1, CM2, D2, img1.size(), R, T, R1, R2, P1, P2, Q ,0,0);
     //initUndistortRectifyMap(CM1, D1, Mat(), P1, img1.size(), CV_16SC2, map1x, map1y);
+
+    // returns lookup maps mapx and mapy as output.These maps indicate from where we
+    // should interpolate source pixels for each pixel of the destination image
     initUndistortRectifyMap(CM1, D1, R1, P1, img1.size(), CV_16SC2, map1x, map1y);
     //initUndistortRectifyMap(CM2, D2, Mat(), P2, img2.size(), CV_16SC2, map2x, map2y);
     initUndistortRectifyMap(CM2, D2, R2, P2, img2.size(), CV_16SC2, map2x, map2y);
